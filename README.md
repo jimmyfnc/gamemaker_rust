@@ -1,125 +1,81 @@
-# 🦀 GameMaker Rust — Modular 2D/3D Game Engine & Editor
+# GameMaker Rust
 
-![Bevy Logo](https://raw.githubusercontent.com/bevyengine/bevy/main/assets/bevy_logo_dark_big.png)
+A 2D game engine with a built-in visual editor, written in Rust on top of
+[Bevy](https://bevyengine.org/) (ECS + rendering) and [egui](https://github.com/emilk/egui)
+(editor UI). The goal is a GameMaker-style workflow: build a scene in the editor, press
+Play, test it, press Stop and you're back where you started.
 
-**GameMaker Rust** is a modular game engine and in-app editor built in [Rust](https://www.rust-lang.org/) using [Bevy](https://bevyengine.org/).  
-The goal is to become a GameMaker Studio-like engine for indie developers: easy to use, lightning-fast, and cross-platform (desktop & web), with a clear path from 2D to 3D games.
+> **Status:** experimental, paused since July 2025 (v0.4.0). It runs and the editor
+> works, but it's a learning project, not a production engine.
 
----
+## What works
 
-## 🚀 Project Goals
+- **Dockable editor** (`egui_dock`): Viewport, Hierarchy, Inspector, Asset Browser,
+  Console, Entity Spawner, Game Controls, and grid/background/scene settings panels you
+  can drag, resize and rearrange.
+- **Inspector with live component editing**: add or remove components (Player, Enemy,
+  Shooter, Collider, Health, CustomSprite) on any entity while the game is running.
+- **Play / Pause / Stop**: the scene state is snapshotted when you press Play and
+  restored on Stop.
+- **Scene save/load** to [RON](https://github.com/ron-rs/ron) files (`scenes/`).
+- **Gameplay systems**: keyboard movement, shooting with cooldowns, AABB collision,
+  health and damage, screen-boundary clamping.
+- **Editor camera** with right-click drag panning, toggleable grid and background.
 
-- **2D Game Engine:** Robust 2D rendering, input, physics, and asset pipeline.
-- **Visual Editor:** In-app scene, asset, and entity editor using an immediate-mode GUI (`egui`).
-- **Extensible Core:** Clean ECS architecture, plugin-ready, and eventually scripting support.
-- **3D Ready:** Foundation for 3D features (camera, meshes, lighting) for future expansion.
-- **Export Anywhere:** Target Windows, macOS, Linux, and WebAssembly.
+## Architecture
 
----
+```
+┌──────────────────────────────┐
+│ Editor UI (egui + egui_dock) │  hierarchy, inspector, asset browser, console
+└──────────────┬───────────────┘
+               │ reads/writes ECS state
+┌──────────────▼───────────────┐
+│ Engine core (Bevy ECS)       │  components, resources, systems, scene (RON)
+└──────────────┬───────────────┘
+┌──────────────▼───────────────┐
+│ Renderer (Bevy / wgpu)       │  2D sprites, grid, background
+└──────────────────────────────┘
+```
 
-## 🏗️ Architecture
+| Path | Contents |
+| --- | --- |
+| `src/components.rs` | ECS components (Player, Enemy, Shooter, Collider, Health, …) |
+| `src/resources.rs` | Editor and game state, dock layout, settings |
+| `src/systems/` | Input, gameplay, collision, camera, rendering, editor shortcuts |
+| `src/ui/` | Editor panels: hierarchy, inspector, asset browser, menus |
+| `src/scene/` | Scene serialization to and from RON |
 
+## Run it
 
-
-+-----------------------+
-| Editor UI (egui) | ← Scene tree, entity inspector, asset browser
-+----------+------------+
-|
-v
-+----------+------------+
-| Engine Core (Bevy) | ← ECS, systems, resources, asset management
-+----------+------------+
-|
-v
-+----------+------------+
-| Renderer (wgpu) | ← 2D (sprites, tilemaps), 3D-ready for later
-+-----------------------+
-
-
-
-
-
-- **Editor UI:** Built using `egui`, appears in-app, interacts with Bevy ECS for live editing.
-- **Engine Core:** Handles scenes, components, systems (input, rendering, etc.).
-- **Renderer:** Abstracted via Bevy/wgpu, supports both 2D and future 3D.
-
----
-
-## ✨ Features
-
-- [x] **2D Sprite Rendering**
-- [x] **Basic Editor UI** with entity/position listing
-- [x] **Keyboard Input for Player Movement**
-- [x] **Live Scene Updates** (edit entities while running)
-- [ ] **Entity Selection & Manipulation**
-- [ ] **Asset Import Pipeline** (images, audio, etc.)
-- [ ] **Scene Save/Load (JSON/RON)**
-- [ ] **Animation & Audio Support**
-- [ ] **Plugin System**
-- [ ] **3D Support (future)**
-
----
-
-## 📦 Getting Started
-
-### Prerequisites
-
-- [Rust](https://www.rust-lang.org/tools/install)
-- [Git](https://git-scm.com/)
-- Recommended: [VS Code](https://code.visualstudio.com/) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
-
-### Clone & Run
+Requires [Rust](https://www.rust-lang.org/tools/install).
 
 ```bash
-git clone https://github.com/your-username/gamemaker_rust.git
+git clone https://github.com/jimmyfnc/gamemaker_rust.git
 cd gamemaker_rust
 cargo run
+```
 
+The first build compiles Bevy and takes a few minutes.
 
+## Controls
 
+| Key | Action |
+| --- | --- |
+| WASD / arrow keys | Move the player |
+| Space | Shoot |
+| P | Pause / resume |
+| F1 | Toggle debug mode |
+| G / B | Toggle grid / background |
+| H / Tab | Toggle hierarchy / inspector |
+| Right mouse drag | Pan the editor camera |
 
-🛣️ Roadmap / Current Plans
-[ ] Entity Selection: Click/select and modify entities in the editor panel.
+## Ideas not built yet
 
-[ ] Scene Serialization: Save/load the scene (JSON or RON).
+Entity selection and dragging in the viewport, an asset import pipeline, sprite
+animation, scripting (Lua, Rhai or WASM), and 3D.
 
-[ ] Asset Importing: Drag/drop or load sprites, backgrounds, audio.
+See [CHANGELOG.md](CHANGELOG.md) for the version history.
 
-[ ] Scene Hierarchy/Inspector: View and edit entities/components visually.
+## License
 
-[ ] Mouse Controls: Move entities with drag-and-drop.
-
-[ ] Animation: Add sprite animation and timelines.
-
-[ ] Plugin/Script Support: (Optional) Add scripting (Lua, Rhai, or WASM).
-
-[ ] 3D Features: Add camera, meshes, and lights for 3D support.
-
-
-
-
-🤝 Contributing
-Learning Rust or Bevy? Perfect!
-This project is beginner-friendly. Issues, pull requests, and feedback are welcome.
-
-To contribute:
-
-Fork this repo and clone your fork.
-
-Create a new branch (git checkout -b feature/my-feature).
-
-Make your changes and commit.
-
-Push to your fork and open a Pull Request.
-
-📚 Learning Resources
-The Rust Book
-
-Bevy Engine Book
-
-egui Docs
-
-Rustlings Practice
-
-Awesome Bevy
-
+MIT

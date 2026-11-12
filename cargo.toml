@@ -1,6 +1,6 @@
 [package]
 name = "gamemaker_rust"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "A 2D game engine and editor built with Rust and Bevy"
 authors = ["GameMaker Rust Team"]
